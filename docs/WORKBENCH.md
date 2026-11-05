@@ -1,5 +1,7 @@
 # 通用 PID 参数整定工作台
 
+详细操作见 [使用说明书](USER_MANUAL.md)，所有项目函数见 [函数参考](FUNCTION_REFERENCE.md)。本文主要说明算法与工程边界。
+
 本工程包含 `sdk/`、`pid_agent.workbench` 和独立静态网页。正式桌面环境为 Windows，通信采用电脑主动连接串口或 TCP。自动整定只使用数值算法，不依赖 MATLAB 或大模型。**启动命令为 `python -m pid_agent.workbench`，端口默认 8766**。
 
 ## 启动

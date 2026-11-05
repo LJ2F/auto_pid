@@ -1,5 +1,7 @@
 # 通用 C99 PID SDK
 
+详细文档：[完整使用与真机接入说明](../docs/USER_MANUAL.md) · [逐函数参考手册](../docs/FUNCTION_REFERENCE.md)。下面保留最小接入概要。
+
 将 `include/pt_sdk.h` 与 `src/pt_pid.c`、`src/pt_protocol.c`、`src/pt_runtime.c` 加入 STM32 工程，添加 include 路径。无 HAL、RTOS、C++、动态内存依赖。数学库由工具链提供；不要启用破坏 `isfinite` 语义的 `-ffast-math`。
 
 ## 最小接入
