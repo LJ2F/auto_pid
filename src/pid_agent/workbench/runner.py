@@ -70,6 +70,9 @@ class Runner:
         self.method = request.get("method", "bayesian")
         if self.method not in ("bayesian", "pattern", "cmaes"):
             raise ValueError("未知搜索器")
+        self.cooldown = max(0.0, float(request.get("cooldown_seconds", 0.0)))
+        self.alternating = bool(request.get("alternating_steps", False))
+        self.step_sign = 1.0
         self.count = 0
         self.experiment_seconds = 0.0
         self.started = 0.0
@@ -86,6 +89,13 @@ class Runner:
 
     def trial(self, cfg: Configuration, plan: Plan, purpose: str, evaluate=True):
         self.check_budget(plan)
+        if self.count > 0 and self.cooldown > 0:
+            if self.cancel.wait(self.cooldown):
+                raise TrialAborted("cancelled", [])
+        if self.alternating and not plan.wave and not plan.open_loop and purpose in ("search", "validation"):
+            if plan.amplitude != 0:
+                plan = replace(plan, amplitude=float(plan.amplitude * self.step_sign))
+                self.step_sign = -self.step_sign
         self.count += 1
         self.experiment_seconds += plan.duration
         record = dict(number=self.count, purpose=purpose, configuration=cfg.to_dict(), plan=asdict(plan),

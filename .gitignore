@@ -1,9 +1,19 @@
 __pycache__/
 *.py[cod]
+*$py.class
 .venv/
-*.egg-info/
-.test-tmp/
 results/
-build/
 dist/
-.env
+.test-tmp/
+.vscode/
+.serena/
+.logs/
+build_validation_*/
+staging_*/
+graphify*-out/
+
+# Native binaries (generated locally via python tools/build_workbench.py)
+src/pid_agent/workbench/native/*.dll
+src/pid_agent/workbench/native/*.so
+src/pid_agent/workbench/native/*.dylib
+

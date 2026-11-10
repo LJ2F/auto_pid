@@ -302,4 +302,35 @@ class TransportAndHTTPTests(unittest.TestCase):
                 conn.close();server.shutdown();server.server_close();t.join();service.close()
 
 
+class EnhancementTests(unittest.TestCase):
+    def test_c_sdk_noise_resynchronization(self):
+        link = NativeLink()
+        d = Device(link)
+        # Verify device is working
+        d.status()
+        # Feed garbage noise directly into link, followed by a valid exchange
+        noisy_stream = b"random_noise_without_header\xaa\x12\x34\x56" + b"\x00" * 50
+        link.write(noisy_stream)
+        # Now normal exchange should succeed seamlessly despite the preceding noise
+        info = d.status()
+        self.assertEqual(info["state"], 0)  # PT_IDLE
+        d.close()
+
+    def test_cooldown_and_alternating_steps(self):
+        with test_directory() as tmp:
+            d = Device(NativeLink())
+            req = request(cooldown_seconds=0.01, alternating_steps=True)
+            runner = Runner(d, req, threading.Event(), lambda *_: None, Path(tmp))
+            report = runner.run()
+            self.assertIn(report["status"], ("validated", "validation_failed", "complete"))
+            # Check recorded trials: search/validation amplitudes should alternate signs
+            search_plans = [r["plan"] for r in report["records"] if r["purpose"] in ("search", "validation")]
+            if len(search_plans) >= 2:
+                # Should have both positive and negative amplitudes
+                amps = [p["amplitude"] for p in search_plans]
+                self.assertTrue(any(a > 0 for a in amps))
+                self.assertTrue(any(a < 0 for a in amps))
+            d.close()
+
+
 if __name__=='__main__':unittest.main()

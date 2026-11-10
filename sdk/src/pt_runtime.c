@@ -221,7 +221,12 @@ void pt_runtime_receive(pt_runtime *rt,const uint8_t *data,size_t size,uint32_t 
             if(cmd==rt->command)dispatch(rt,p->bytes,len,now);
             p->used-=len;memmove(p->bytes,p->bytes+len,p->used);continue;
 discard:
-            --p->used;memmove(p->bytes,p->bytes+1,p->used);
+            {
+                size_t k=1;
+                while(k<p->used && p->bytes[k]!=0xAA) ++k;
+                p->used-=k;
+                if(p->used) memmove(p->bytes,p->bytes+k,p->used);
+            }
         }
     }
 }
